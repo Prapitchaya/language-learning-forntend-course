@@ -1,23 +1,44 @@
 <template>
-  <div>
-    <h2>Course Listings</h2>
-    <div>
-      <div v-for="course in courses" :key="course.id" class="course-card">
-        <h3>{{ course.title }}</h3>
-        <p>{{ course.description }}</p>
-        <p>Price: {{ course.pricing }}</p>
-        <p>Language: {{ course.language }}</p>
-        <p>Level: {{ course.proficiency_level }}</p>
-        <router-link :to="{ name: 'course-detail', params: { id: course.id } }">
-          View Details
-        </router-link>
-      </div>
+  <q-page class="course-list-page q-pa-md">
+    <div v-if="courses.length > 0">
+      <h2 class="q-mb-md text-h6">Course Listing</h2>
+      <q-list bordered>
+        <q-item v-for="course in courses" :key="course.course_id">
+          <q-item-section>
+            <q-item-label>
+              <h4 class="text-h6 q-mb-sm">{{ course.title }}</h4>
+              <p class="q-mb-md">{{ course.description }}</p>
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side top>
+            <q-item-label>
+              <div class="q-mb-xs">
+                <strong>Language:</strong> {{ course.language }}
+              </div>
+              <div class="q-mb-xs">
+                <strong>Proficiency Level:</strong>
+                {{ course.proficiency_level }}
+              </div>
+              <div class="q-mb-xs">
+                <strong>Instructor:</strong> {{ course.instructor_name }}
+              </div>
+              <div class="text-primary">
+                <strong>Pricing:</strong> ${{ course.pricing }}
+              </div>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
     </div>
-  </div>
+    <div v-else>
+      <q-spinner-square size="80px" color="primary" />
+      <div class="q-mt-md text-h6">No courses available</div>
+    </div>
+  </q-page>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
@@ -25,24 +46,21 @@ export default {
       courses: [],
     };
   },
-  mounted() {
-    // Fetch course list from your API using Axios
-    axios.get('http://your-api-base-url/api/courses') // Replace with your actual API base URL
-      .then(response => {
-        console.log('API Response:', response.data); // Debugging statement
+  methods: {
+    async fetchCourses() {
+      try {
+        // const response = await axios.get("http://localhost:3000/api/courses");
+        const response = await axios.get(
+          "https://language-learning-backend-rosy.vercel.app/api/courses"
+        );
         this.courses = response.data;
-      })
-      .catch(error => {
-        console.error('Error fetching course list:', error);
-      });
+      } catch (error) {
+        console.error("Error fetching courses", error);
+      }
+    },
+  },
+  async created() {
+    await this.fetchCourses();
   },
 };
 </script>
-
-<style scoped>
-.course-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin: 10px;
-}
-</style>
